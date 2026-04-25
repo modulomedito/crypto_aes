@@ -25,8 +25,8 @@
     do {                                                                                           \
         extern i32 TEST__CONCAT(mod, __test)(void);                                                \
         i32 result = TEST__CONCAT(mod, __test)();                                                  \
-        if (result < 0) {                                                                          \
-            printf("Test " #mod " FAILED! Code = %d\n", result);                                   \
+        if (result != 0) {                                                                         \
+            printf("Test " #mod " FAILED! (Failed line = %d)\n", result);                          \
             goto failed;                                                                           \
         }                                                                                          \
     } while (0)

@@ -725,17 +725,6 @@ static void crypto_aes__inv_shift_rows(crypto_aes__State* state_mut) {
 //==================================================================================================
 #include <string.h>
 
-typedef enum {
-    crypto_aes__TestResult_0000Failed = -10000,
-    crypto_aes__TestResult_0001Failed,
-    crypto_aes__TestResult_0002Failed,
-    crypto_aes__TestResult_0003Failed,
-    crypto_aes__TestResult_0004Failed,
-    crypto_aes__TestResult_0005Failed,
-    crypto_aes__TestResult_0006Failed,
-    crypto_aes__TestResult_0007Failed,
-} crypto_aes__TestResult;
-
 /// Test AES128 ECB encrypt synchornously
 static i32 crypto_aes__test_tc1(void) {
     u8 plain_buf[] = {
@@ -778,7 +767,7 @@ static i32 crypto_aes__test_tc1(void) {
 
     i32 ret = memcmp(expected_cipher_buf, cipher_buf, 64 * sizeof(u8));
     if (ret != 0) {
-        return crypto_aes__TestResult_0000Failed;
+        return __LINE__;
     }
 
     return 0;
@@ -826,7 +815,7 @@ static i32 crypto_aes__test_tc2(void) {
 
     i32 ret = memcmp(expected_plain_buf, plain_buf, 64 * sizeof(u8));
     if (ret != 0) {
-        return crypto_aes__TestResult_0001Failed;
+        return __LINE__;
     }
 
     return 0;
@@ -836,11 +825,11 @@ i32 crypto_aes__test(void) {
     i32 result;
 
     result = crypto_aes__test_tc1();
-    if (result < 0) {
+    if (result != 0) {
         return result;
     }
     result = crypto_aes__test_tc2();
-    if (result < 0) {
+    if (result != 0) {
         return result;
     }
 
