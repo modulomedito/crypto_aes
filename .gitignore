@@ -7,6 +7,8 @@
 *.obj
 *.elf
 compile_commands.json
+/.xmake/
+/build/
 
 # Linker output
 *.ilk
