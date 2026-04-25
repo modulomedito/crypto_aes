@@ -6,6 +6,7 @@
 *.ko
 *.obj
 *.elf
+compile_commands.json
 
 # Linker output
 *.ilk

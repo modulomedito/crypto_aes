@@ -28,12 +28,7 @@ extern "C" {
 //==================================================================================================
 // PUBLIC DEFINE
 //==================================================================================================
-// Define the macros below to 1/0 to enable/disable the mode of operation.
-#define CRYPTO_AES__AES128 (1)
-#define CRYPTO_AES__AES192 (0)
-#define CRYPTO_AES__AES256 (0)
-
-// Block length in bytes - AES is 128b block only
+/// Block length in bytes - AES is 128b block only
 #define CRYPTO_AES__BLOCK_U8_SIZE (16)
 
 //==================================================================================================
@@ -65,11 +60,11 @@ typedef enum {
 //==================================================================================================
 // PUBLIC STRUCT
 //==================================================================================================
-// Use the maxium key exp size for compatibility
-// - AES128, key len = 16, key exp size = 176
-// - AES192, key len = 24, key exp size = 208
-// - AES256, key len = 32, key exp size = 240
 typedef struct {
+    /// Use the maxium key exp size for compatibility
+    /// - AES128, key len = 16, key exp size = 176
+    /// - AES192, key len = 24, key exp size = 208
+    /// - AES256, key len = 32, key exp size = 240
     u8 round_key_buf[240];
     u8 iv_buf[CRYPTO_AES__BLOCK_U8_SIZE];
 } crypto_aes__Ctx;
