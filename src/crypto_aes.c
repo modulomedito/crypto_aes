@@ -94,7 +94,8 @@ static const u8 crypto_aes__sbox_tbl[256] = {
     0xba, 0x78, 0x25, 0x2e, 0x1c, 0xa6, 0xb4, 0xc6, 0xe8, 0xdd, 0x74, 0x1f, 0x4b, 0xbd, 0x8b, 0x8a,
     0x70, 0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35, 0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e,
     0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
-    0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16};
+    0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
+};
 
 static const u8 crypto_aes__rsbox_tbl[256] = {
     0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
@@ -112,7 +113,8 @@ static const u8 crypto_aes__rsbox_tbl[256] = {
     0x1f, 0xdd, 0xa8, 0x33, 0x88, 0x07, 0xc7, 0x31, 0xb1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xec, 0x5f,
     0x60, 0x51, 0x7f, 0xa9, 0x19, 0xb5, 0x4a, 0x0d, 0x2d, 0xe5, 0x7a, 0x9f, 0x93, 0xc9, 0x9c, 0xef,
     0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61,
-    0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d};
+    0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
+};
 
 static const u8 crypto_aes__rcon_tbl[11] =
     {0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36};
@@ -323,48 +325,54 @@ i32 crypto_aes__Obj_finalize(crypto_aes__Obj* self) {
 
     if (self->mode == crypto_aes__Mode_Ecb || self->mode == crypto_aes__Mode_Cbc) {
         if (self->dir == crypto_aes__Direction_Encrypt) {
-            // PKCS#7 Padding
-            u8 pad_val = CRYPTO_AES__BLOCK_U8_SIZE - self->buf_len;
-            memset(self->buf + self->buf_len, pad_val, pad_val);
-            memcpy(self->out_mut, self->buf, CRYPTO_AES__BLOCK_U8_SIZE);
-            if (self->mode == crypto_aes__Mode_Ecb) {
-                crypto_aes__Obj_ecb_encrypt(self);
-            } else {
-                crypto_aes__Obj_cbc_encrypt(self);
+            // PKCS#7 Padding (only if not aligned)
+            if (self->buf_len > 0) {
+                u8 pad_val = CRYPTO_AES__BLOCK_U8_SIZE - self->buf_len;
+                memset(self->buf + self->buf_len, pad_val, pad_val);
+                memcpy(self->out_mut, self->buf, CRYPTO_AES__BLOCK_U8_SIZE);
+                if (self->mode == crypto_aes__Mode_Ecb) {
+                    crypto_aes__Obj_ecb_encrypt(self);
+                } else {
+                    crypto_aes__Obj_cbc_encrypt(self);
+                }
+                self->out_mut += CRYPTO_AES__BLOCK_U8_SIZE;
             }
-            self->out_mut += CRYPTO_AES__BLOCK_U8_SIZE;
         } else {
             // PKCS#7 Unpadding
-            if (self->buf_len != CRYPTO_AES__BLOCK_U8_SIZE) {
+            if (self->buf_len != 0 && self->buf_len != CRYPTO_AES__BLOCK_U8_SIZE) {
                 ret = -1; // Error: Ciphertext not a multiple of block size
                 goto cleanup;
             }
-            u8 temp[CRYPTO_AES__BLOCK_U8_SIZE];
-            memcpy(temp, self->buf, CRYPTO_AES__BLOCK_U8_SIZE);
-            if (self->mode == crypto_aes__Mode_Ecb) {
-                crypto_aes__Obj_ecb_decrypt(self, temp);
-            } else {
-                crypto_aes__Obj_cbc_decrypt(self, temp);
-            }
-
-            u8 pad_val = temp[CRYPTO_AES__BLOCK_U8_SIZE - 1];
-            if (pad_val < 1 || pad_val > CRYPTO_AES__BLOCK_U8_SIZE) {
-                ret = -1; // Padding error
-                goto cleanup;
-            }
-
-            // Verify padding: check that the last 'pad_val' bytes are all equal to 'pad_val'
-            const u8* padding = &temp[CRYPTO_AES__BLOCK_U8_SIZE - pad_val];
-            for (u8 i = 0; i < pad_val; i++) {
-                if (padding[i] != pad_val) {
-                    ret = -1; // Padding error
-                    goto cleanup;
+            if (self->buf_len == CRYPTO_AES__BLOCK_U8_SIZE) {
+                u8 temp[CRYPTO_AES__BLOCK_U8_SIZE];
+                memcpy(temp, self->buf, CRYPTO_AES__BLOCK_U8_SIZE);
+                if (self->mode == crypto_aes__Mode_Ecb) {
+                    crypto_aes__Obj_ecb_decrypt(self, temp);
+                } else {
+                    crypto_aes__Obj_cbc_decrypt(self, temp);
                 }
-            }
 
-            u32 out_len = CRYPTO_AES__BLOCK_U8_SIZE - pad_val;
-            memcpy(self->out_mut, temp, out_len);
-            self->out_mut += out_len;
+                u8 pad_val = temp[CRYPTO_AES__BLOCK_U8_SIZE - 1];
+                u8 is_padded = 1;
+                if (pad_val < 1 || pad_val > CRYPTO_AES__BLOCK_U8_SIZE) {
+                    is_padded = 0; // Not padded
+                } else {
+                    // Verify padding: check that the last 'pad_val' bytes are all equal to
+                    // 'pad_val'
+                    const u8* padding = &temp[CRYPTO_AES__BLOCK_U8_SIZE - pad_val];
+                    for (u8 i = 0; i < pad_val; i++) {
+                        if (padding[i] != pad_val) {
+                            is_padded = 0; // Not padded
+                            break;
+                        }
+                    }
+                }
+
+                u32 out_len =
+                    is_padded ? (CRYPTO_AES__BLOCK_U8_SIZE - pad_val) : CRYPTO_AES__BLOCK_U8_SIZE;
+                memcpy(self->out_mut, temp, out_len);
+                self->out_mut += out_len;
+            }
         }
     } else if (self->mode == crypto_aes__Mode_Ctr) {
         if (self->buf_len > 0) {
