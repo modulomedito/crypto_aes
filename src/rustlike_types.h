@@ -46,9 +46,9 @@ typedef char* str;
 //==================================================================================================
 // PUBLIC DEFINE
 //==================================================================================================
-#define RUSTLIKE_TYPES__MAJOR_VERSION (0)
-#define RUSTLIKE_TYPES__MINOR_VERSION (1)
-#define RUSTLIKE_TYPES__PATCH_VERSION (0)
+#define RUSTLIKE_TYPES_M_MAJOR_VERSION (0)
+#define RUSTLIKE_TYPES_M_MINOR_VERSION (1)
+#define RUSTLIKE_TYPES_M_PATCH_VERSION (1)
 
 #ifndef bool
 #define bool bool_t
