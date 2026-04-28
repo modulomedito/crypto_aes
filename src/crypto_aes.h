@@ -29,27 +29,27 @@ extern "C" {
 // PUBLIC DEFINE
 //==================================================================================================
 /// Block length in bytes - AES is 128b block only
-#define CRYPTO_AES_M_BLOCK_U8_SIZE (16)
+#define CRYPTO_AES__BLOCK_U8_SIZE (16)
 
 //==================================================================================================
 // PUBLIC ENUM
 //==================================================================================================
 typedef enum {
-    crypto_aes_m_KeyLen_128,
-    crypto_aes_m_KeyLen_192,
-    crypto_aes_m_KeyLen_256,
-} crypto_aes_m_KeyLen;
+    crypto_aes__KeyLen_128,
+    crypto_aes__KeyLen_192,
+    crypto_aes__KeyLen_256,
+} crypto_aes__KeyLen;
 
 typedef enum {
-    crypto_aes_m_Mode_Ecb,
-    crypto_aes_m_Mode_Cbc,
-    crypto_aes_m_Mode_Ctr,
-} crypto_aes_m_Mode;
+    crypto_aes__Mode_Ecb,
+    crypto_aes__Mode_Cbc,
+    crypto_aes__Mode_Ctr,
+} crypto_aes__Mode;
 
 typedef enum {
-    crypto_aes_m_Direction_Encrypt,
-    crypto_aes_m_Direction_Decrypt,
-} crypto_aes_m_Direction;
+    crypto_aes__Direction_Encrypt,
+    crypto_aes__Direction_Decrypt,
+} crypto_aes__Direction;
 
 //==================================================================================================
 // PUBLIC STRUCT
@@ -60,22 +60,22 @@ typedef struct {
     /// - AES192, key len = 24, key exp size = 208
     /// - AES256, key len = 32, key exp size = 240
     u8 round_key_buf[240];
-    u8 iv_buf[CRYPTO_AES_M_BLOCK_U8_SIZE];
-} crypto_aes_m_Ctx;
+    u8 iv_buf[CRYPTO_AES__BLOCK_U8_SIZE];
+} crypto_aes__Ctx;
 
 typedef struct {
-    crypto_aes_m_Ctx ctx;
-    crypto_aes_m_KeyLen keylen;
-    crypto_aes_m_Mode mode;
-    crypto_aes_m_Direction dir;
+    crypto_aes__Ctx ctx;
+    crypto_aes__KeyLen keylen;
+    crypto_aes__Mode mode;
+    crypto_aes__Direction dir;
     const u8* key_ref;
     const u8* iv_ref;
     u8* out_mut;
     u32 key_u32_num;
     u32 round_num;
     u32 buf_len;
-    u8 buf[CRYPTO_AES_M_BLOCK_U8_SIZE];
-} crypto_aes_m_Obj;
+    u8 buf[CRYPTO_AES__BLOCK_U8_SIZE];
+} crypto_aes__Obj;
 
 //==================================================================================================
 // PUBLIC UNION
@@ -88,18 +88,18 @@ typedef struct {
 //==================================================================================================
 // PUBLIC FUNCTION DECLARATION
 //==================================================================================================
-extern i32 crypto_aes_m_encrypt(
-    crypto_aes_m_KeyLen keylen,
-    crypto_aes_m_Mode mode,
+extern i32 crypto_aes__encrypt(
+    crypto_aes__KeyLen keylen,
+    crypto_aes__Mode mode,
     const u8* in_ref,
     u32 in_len,
     const u8* key_ref,
     const u8* iv_ref,
     u8* out_mut
 );
-extern i32 crypto_aes_m_decrypt(
-    crypto_aes_m_KeyLen keylen,
-    crypto_aes_m_Mode mode,
+extern i32 crypto_aes__decrypt(
+    crypto_aes__KeyLen keylen,
+    crypto_aes__Mode mode,
     const u8* in_ref,
     u32 in_len,
     const u8* key_ref,
@@ -107,17 +107,17 @@ extern i32 crypto_aes_m_decrypt(
     u8* out_mut
 );
 
-extern i32 crypto_aes_m_Obj_init(
-    crypto_aes_m_Obj* self,
-    crypto_aes_m_KeyLen keylen,
-    crypto_aes_m_Mode mode,
-    crypto_aes_m_Direction dir,
+extern i32 crypto_aes__Obj_init(
+    crypto_aes__Obj* self,
+    crypto_aes__KeyLen keylen,
+    crypto_aes__Mode mode,
+    crypto_aes__Direction dir,
     const u8* key_ref,
     const u8* iv_ref,
     u8* out_mut
 );
-extern i32 crypto_aes_m_Obj_update(crypto_aes_m_Obj* self, const u8* in_ref, u32 in_len);
-extern i32 crypto_aes_m_Obj_finalize(crypto_aes_m_Obj* self);
+extern i32 crypto_aes__Obj_update(crypto_aes__Obj* self, const u8* in_ref, u32 in_len);
+extern i32 crypto_aes__Obj_finalize(crypto_aes__Obj* self);
 
 //==================================================================================================
 // GUARD END
