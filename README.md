@@ -1,2 +1,106 @@
 # crypto_aes
-AES (Advanced Encryption Standard) cryptography algorithm. Supports AES128, AES192, AES256.
+
+AES (Advanced Encryption Standard) cryptography algorithm.
+Supports AES128, AES192, AES256.
+
+## How To Use?
+
+1. Copy all files in the `src` folder to your project, which are:
+
+- crypto_aes.c
+- crypto_aes.h
+- rustlike_types.h
+
+2. In your cryptography source code:
+
+If you want to execute the AES algorithm **synchronously**
+
+```c
+// File: main.c
+
+#include "crypto_aes.h"
+
+u8 main__plain_buf[] = {
+    0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96,
+    0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a,
+    0xae, 0x2d, 0x8a, 0x57, 0x1e, 0x03, 0xac, 0x9c,
+    0x9e, 0xb7, 0x6f, 0xac, 0x45, 0xaf, 0x8e, 0x51,
+    0x30, 0xc8, 0x1c, 0x46, 0xa3, 0x5c, 0xe4, 0x11,
+    0xe5, 0xfb, 0xc1, 0x19, 0x1a, 0x0a, 0x52, 0xef,
+    0xf6, 0x9f, 0x24, 0x45, 0xdf, 0x4f, 0x9b, 0x17,
+    0xad, 0x2b, 0x41, 0x7b, 0xe6, 0x6c, 0x37, 0x10,
+};
+u8 main__key_buf[128 / 8] = {
+    0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
+    0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c,
+};
+u8 main__cipher_buf[64];
+
+i32 main(void) {
+    crypto_aes__encrypt(
+        crypto_aes__KeyLen_128, // Input, the AES key length
+        crypto_aes__Mode_Ecb,   // Input, the AES mode
+        main__plain_buf,        // Input, plain text buffer
+        64,                     // Input, plain text buffer size in bytes
+        main__key_buf,          // Input, secret key buffer
+        NULL,                   // Input, the IV buffer of AES algorithm
+        main__cipher_buf        // Output, the cipher text
+    );
+}
+```
+
+If you want to execute the AES algorithm **asynchronously**
+
+In your init function:
+
+```c
+// File: myinit.c
+
+#include "crypto_aes.h"
+
+crypto_aes__Obj myinit__aes_obj;
+
+const u8 myinit__key_buf[256 / 8] = {
+    0x60, 0x3d, 0xeb, 0x10, 0x15, 0xca, 0x71, 0xbe,
+    0x2b, 0x73, 0xae, 0xf0, 0x85, 0x7d, 0x77, 0x81,
+    0x1f, 0x35, 0x2c, 0x07, 0x3b, 0x61, 0x08, 0xd7,
+    0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4,
+};
+
+u8 myinit__cipher_text_buf[2048];
+
+void myinit__init(void) {
+    i32 ret = crypto_aes__Obj_init(
+        &myinit__aes_obj,
+        crypto_aes__KeyLen_256,
+        crypto_aes__Mode_Ecb,
+        crypto_aes__Direction_Encrypt,
+        my_init__key_buf,
+        NULL,
+        out_mut
+    );
+}
+```
+
+In your periodical task function:
+
+```c
+// File: mytask.c
+
+#include "crypto_aes.h"
+
+extern crypto_aes__Obj myinit__aes_obj;
+
+const u8 mytask__plain_buf[] = {
+    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+};
+
+u8 my_init__cipher_text_buf[2048];
+
+void myinit__func(void) {
+    i32 ret = crypto_aes__Obj_update(&myinit__aes_obj, in_ref, in_len);
+}
+```
