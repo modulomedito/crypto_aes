@@ -2,7 +2,7 @@
 /// @file       test.h
 /// @author     modulomedito (chcchc1995@outlook.com)
 /// @brief
-/// @copyright  Copyright (C) 2026. All rights reserved.
+/// @copyright  Copyright (C) 2026. MIT License.
 /// @details
 //==================================================================================================
 //==================================================================================================
