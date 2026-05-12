@@ -76,6 +76,8 @@ typedef struct {
     u32 key_u32_num;
     u32 round_num;
     u32 buf_len;
+    u8* result_buf;
+    u32 result_len;
     u8 buf[CRYPTO_AES__BLOCK_U8_SIZE];
 } crypto_aes__Obj;
 
@@ -119,7 +121,11 @@ extern i32 crypto_aes__Obj_init(
     u8* out_mut
 );
 extern i32 crypto_aes__Obj_update(crypto_aes__Obj* self, const u8* in_ref, u32 in_len);
-extern i32 crypto_aes__Obj_finalize(crypto_aes__Obj* self);
+extern i32 crypto_aes__Obj_finalize(
+    crypto_aes__Obj* self,
+    u8** result_buf_mut,
+    u32* result_len_mut
+);
 
 //==================================================================================================
 // GUARD END

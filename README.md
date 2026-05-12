@@ -5,15 +5,15 @@ Supports AES128, AES192, AES256.
 
 ## How To Use?
 
-1. Copy all files in the `src` folder to your project, which are:
+### 1. Copy all files in the `src` folder to your project, which are:
 
 - crypto_aes.c
 - crypto_aes.h
 - rustlike_types.h
 
-2. In your cryptography source code:
+### 2. In your cryptography source code:
 
-If you want to execute the AES algorithm **synchronously**
+#### If you want to execute the AES algorithm synchronously
 
 ```c
 // File: main.c
@@ -49,58 +49,73 @@ i32 main(void) {
 }
 ```
 
-If you want to execute the AES algorithm **asynchronously**
-
-In your init function:
+#### If you want to execute the AES algorithm asynchronously
 
 ```c
-// File: myinit.c
+// File: myfile.c
 
 #include "crypto_aes.h"
+#include <string.h>
 
-crypto_aes__Obj myinit__aes_obj;
+crypto_aes__Obj myfile__aes_obj;
 
-const u8 myinit__key_buf[256 / 8] = {
+// Plain text
+const u8 myfile__plain_buf[] = {
+    0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
+    0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
+    0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33,
+};
+
+// Index for looping through the plain text
+u32 myfile__index = 0;
+
+// AES256 key
+const u8 myfile__key_buf[256 / 8] = {
     0x60, 0x3d, 0xeb, 0x10, 0x15, 0xca, 0x71, 0xbe,
     0x2b, 0x73, 0xae, 0xf0, 0x85, 0x7d, 0x77, 0x81,
     0x1f, 0x35, 0x2c, 0x07, 0x3b, 0x61, 0x08, 0xd7,
     0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4,
 };
 
-u8 myinit__cipher_text_buf[2048];
+// A big enough buffer for saving the result of AES
+static u8 myfile__cipher_buf[2048];
 
-void myinit__init(void) {
-    i32 ret = crypto_aes__Obj_init(
-        &myinit__aes_obj,
+// Your init function
+void myfile__init(void) {
+    crypto_aes__Obj_init(
+        &myfile__aes_obj,
         crypto_aes__KeyLen_256,
         crypto_aes__Mode_Ecb,
         crypto_aes__Direction_Encrypt,
-        my_init__key_buf,
+        myfile__key_buf,
         NULL,
-        out_mut
+        myfile__cipher_buf
     );
 }
-```
 
-In your periodical task function:
+// Your preriodical task function, called multiple times
+void myfile__task(void) {
+    if (myfile__index <= 16) {
+        crypto_aes__Obj_update(
+            &myfile__aes_obj,
+            &myfile__plain_buf[myfile__index],
+            8
+        );
+        myfile__index += 8;
+    }
+}
 
-```c
-// File: mytask.c
+// Your finalize function, where you want to use the AES result
+void myfile__final(void) {
+    u8* result_buf_mut;
+    u32 result_len;
 
-#include "crypto_aes.h"
+    crypto_aes__Obj_finalize(&myfile__aes_obj, &result_buf_mut, &result_len);
 
-extern crypto_aes__Obj myinit__aes_obj;
-
-const u8 mytask__plain_buf[] = {
-    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
-    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
-    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
-    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
-};
-
-u8 my_init__cipher_text_buf[2048];
-
-void myinit__func(void) {
-    i32 ret = crypto_aes__Obj_update(&myinit__aes_obj, in_ref, in_len);
+    // Compare the result with your expected value:
+    i32 ret = memcmp(YOUR_EXPECTED_BUF, result_buf_mut, result_len * sizeof(u8));
+    if (ret != 0) {
+        // Compare failed handling
+    }
 }
 ```
