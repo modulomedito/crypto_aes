@@ -119,3 +119,13 @@ void myfile__final(void) {
     }
 }
 ```
+
+## How To Test?
+
+Test with xmake, you need to install [xmake](https://xmake.io/) first.
+
+```bash
+git clone https://github.com/modulomedito/crypto_aes.git
+cd crypto_aes
+xmake test -v
+```
