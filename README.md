@@ -57,7 +57,7 @@ i32 main(void) {
 #include "crypto_aes.h"
 #include <string.h>
 
-crypto_aes__Obj myfile__aes_obj;
+crypto_aes__Handle myfile__aes_handle;
 
 // Plain text
 const u8 myfile__plain_buf[] = {
@@ -82,8 +82,8 @@ static u8 myfile__cipher_buf[2048];
 
 // Your init function
 void myfile__init(void) {
-    crypto_aes__Obj_init(
-        &myfile__aes_obj,
+    crypto_aes__Handle_init(
+        &myfile__aes_handle,
         crypto_aes__KeyLen_256,
         crypto_aes__Mode_Ecb,
         crypto_aes__Direction_Encrypt,
@@ -96,8 +96,8 @@ void myfile__init(void) {
 // Your preriodical task function, called multiple times
 void myfile__task(void) {
     if (myfile__index <= 16) {
-        crypto_aes__Obj_update(
-            &myfile__aes_obj,
+        crypto_aes__Handle_update(
+            &myfile__aes_handle,
             &myfile__plain_buf[myfile__index],
             8
         );
@@ -110,7 +110,7 @@ void myfile__final(void) {
     u8* result_buf_mut;
     u32 result_len;
 
-    crypto_aes__Obj_finalize(&myfile__aes_obj, &result_buf_mut, &result_len);
+    crypto_aes__Handle_finalize(&myfile__aes_handle, &result_buf_mut, &result_len);
 
     // Compare the result with your expected value:
     i32 ret = memcmp(YOUR_EXPECTED_BUF, result_buf_mut, result_len * sizeof(u8));
